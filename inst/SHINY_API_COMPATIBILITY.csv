@@ -196,8 +196,8 @@ runGitHub,not implemented,Not exported by WinShiny.
 runTests,not implemented,Not exported by WinShiny.
 runUrl,not implemented,Not exported by WinShiny.
 safeError,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
-selectInput,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
-selectizeInput,partial,Mapped to a native WPF ComboBox; Selectize.js options and server mode are not reproduced.
+selectInput,native,Implemented with a native WPF ComboBox for single selection and ListBox for multiple selection; returns scalar or character vector values.
+selectizeInput,partial,Mapped to a native WPF ComboBox or multi-selection ListBox; Selectize.js options and server mode are not reproduced.
 serverInfo,shim,Compatibility shim or metadata/no-op implementation; browser/server behavior is not reproduced.
 setBookmarkExclude,not implemented,Not exported by WinShiny.
 setProgress,not implemented,Not exported by WinShiny.
@@ -271,7 +271,7 @@ useBusyIndicators,not implemented,Not exported by WinShiny.
 validate,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
 validateCssUnit,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
 varSelectInput,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
-varSelectizeInput,partial,Mapped to a native WPF ComboBox of data-frame column names.
+varSelectizeInput,partial,Mapped to a native WPF ComboBox or multi-selection ListBox of data-frame column names.
 verbatimTextOutput,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
 verticalLayout,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
 wellPanel,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.

@@ -8,6 +8,20 @@ ui <- fluidPage(
   sliderInput("confidence", "Confidence", min = 0, max = 100, value = 75, step = 5, post = "%"),
   radioButtons("priority", "Priority", choices = c(Low = "low", Normal = "normal", High = "high"), selected = "normal"),
   selectInput("category", "Category", choices = c("Analysis", "Reporting", "Automation"), selected = "Analysis"),
+  selectInput(
+    "formats", "Output formats",
+    choices = c("CSV", "Word", "PDF", "PNG"),
+    selected = c("CSV", "Word"),
+    multiple = TRUE,
+    size = 4
+  ),
+  selectizeInput(
+    "audiences", "Audiences",
+    choices = c("Analysts", "Managers", "Clients", "Public"),
+    selected = c("Analysts", "Managers"),
+    multiple = TRUE,
+    size = 4
+  ),
   checkboxGroupInput(
     "channels",
     "Output channels",
@@ -35,9 +49,11 @@ server <- function(input, output, session) {
 
   output$settings <- renderTable({
     data.frame(
-      Setting = c("Priority", "Channels", "Approved", "Notes"),
+      Setting = c("Priority", "Formats", "Audiences", "Channels", "Approved", "Notes"),
       Value = c(
         input$priority,
+        paste(as.character(input$formats), collapse = ", "),
+        paste(as.character(input$audiences), collapse = ", "),
         paste(as.character(input$channels), collapse = ", "),
         as.character(isTRUE(input$approved)),
         gsub("[\r\n]+", " / ", input$notes)

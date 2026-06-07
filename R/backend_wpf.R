@@ -378,13 +378,27 @@ collect_nodes <- function(ui) {
     )
   } else if (kind %in% c('select', 'selectize', 'varselectize')) {
     choices <- inp$args$choices %||% character()
-    lines <- c(lines,
-      paste0('  ', ctrl, '=New-Object Windows.Controls.ComboBox'),
-      paste0('  ', ctrl, '.IsEditable=$false; ', ctrl, '.IsTextSearchEnabled=$true'),
-      unname(vapply(choices, function(v) paste0('  [void]', ctrl, '.Items.Add(', .ps_quote(v), ')'), character(1))),
-      paste0('  ', ctrl, '.SelectedItem=', .ps_quote(if (length(inp$value)) inp$value[[1]] else '')),
-      paste0('  ', ctrl, '.Add_SelectionChanged({ if($this.SelectedItem -ne $null){ Send-Event ', .ps_quote(id), ' ([string]$this.SelectedItem); Flush-PendingEvents } })')
-    )
+    multiple <- isTRUE(inp$args$multiple)
+    selected <- as.character(inp$value %||% character())
+    if (multiple) {
+      visible_items <- suppressWarnings(as.integer(inp$args$size %||% min(6L, max(3L, length(choices)))))
+      if (is.na(visible_items) || visible_items < 1L) visible_items <- 6L
+      lines <- c(lines,
+        paste0('  ', ctrl, '=New-Object Windows.Controls.ListBox'),
+        paste0('  ', ctrl, '.SelectionMode="Multiple"; ', ctrl, '.MinHeight=', max(72L, 26L * visible_items), '; ', ctrl, '.MaxHeight=', max(72L, 26L * visible_items)),
+        unname(vapply(choices, function(v) paste0('  [void]', ctrl, '.Items.Add(', .ps_quote(v), ')'), character(1))),
+        unname(vapply(selected, function(v) paste0('  if(', ctrl, '.Items.Contains(', .ps_quote(v), ')){ [void]', ctrl, '.SelectedItems.Add(', .ps_quote(v), ') }'), character(1))),
+        paste0('  ', ctrl, '.Add_SelectionChanged({ $vals=[string[]]@($this.SelectedItems | ForEach-Object { [string]$_ }); Send-Event ', .ps_quote(id), ' $vals; Flush-PendingEvents })')
+      )
+    } else {
+      lines <- c(lines,
+        paste0('  ', ctrl, '=New-Object Windows.Controls.ComboBox'),
+        paste0('  ', ctrl, '.IsEditable=$false; ', ctrl, '.IsTextSearchEnabled=$true'),
+        unname(vapply(choices, function(v) paste0('  [void]', ctrl, '.Items.Add(', .ps_quote(v), ')'), character(1))),
+        paste0('  ', ctrl, '.SelectedItem=', .ps_quote(if (length(selected)) selected[[1]] else '')),
+        paste0('  ', ctrl, '.Add_SelectionChanged({ if($this.SelectedItem -ne $null){ Send-Event ', .ps_quote(id), ' ([string]$this.SelectedItem); Flush-PendingEvents } })')
+      )
+    }
   } else if (kind == 'radio') {
     choices <- inp$args$choices %||% character()
     lines <- c(lines, paste0('  ', ctrl, '=New-Object Windows.Controls.', if (isTRUE(inp$args$inline)) 'WrapPanel' else 'StackPanel'))
@@ -1082,7 +1096,8 @@ make_ps1 <- function(nodes, eventFile, stateFile, commandFile, readyFile, logFil
     '    if($root -is [Windows.Window]){ Set-WinShinyTitleBar $root $dark }',
     '  }',
     '  function Find-ScrollViewer($ctl){ try { $cur=$ctl; while($null -ne $cur){ if($cur -is [Windows.Controls.ScrollViewer]){ return $cur }; $cur=[Windows.Media.VisualTreeHelper]::GetParent($cur) } } catch {}; return $null }',
-    '  function Get-RemainingViewportHeight($ctl){ try { $sv=Find-ScrollViewer $ctl; if($sv -and $sv.ViewportHeight -gt 0){ $pt=$ctl.TransformToAncestor($sv).Transform([Windows.Point]::new(0,0)); return [math]::Max(150,[double]$sv.ViewportHeight-[double]$pt.Y-28) } } catch {}; return [math]::Max(180,[double]$win.ActualHeight-250) }',
+    '  function Get-BottomLayoutChrome($ctl,$sv){ $total=4.0; try { $cur=$ctl; while($null -ne $cur -and $cur -ne $sv){ if($cur -is [Windows.FrameworkElement]){ $total += [double]$cur.Margin.Bottom }; $cur=[Windows.Media.VisualTreeHelper]::GetParent($cur) } } catch {}; return [math]::Max(4.0,$total) }',
+    '  function Get-RemainingViewportHeight($ctl){ try { $sv=Find-ScrollViewer $ctl; if($sv -and $sv.ViewportHeight -gt 0){ $pt=$ctl.TransformToAncestor($sv).Transform([Windows.Point]::new(0,0)); $bottom=Get-BottomLayoutChrome $ctl $sv; return [math]::Max(150,[double]$sv.ViewportHeight-[double]$pt.Y-[double]$bottom) } } catch {}; return [math]::Max(180,[double]$win.ActualHeight-250) }',
     '  function Resize-ResponsiveControls(){ try {',
     '    for($pass=0; $pass -lt 3; $pass++){',
     '      $win.UpdateLayout()',
@@ -1121,7 +1136,7 @@ make_ps1 <- function(nodes, eventFile, stateFile, commandFile, readyFile, logFil
     '      if($kind -notin @("checkbox","theme","button","link","clipboard")){ $lbl=New-Object Windows.Controls.TextBlock; $lbl.Text=$label; $lbl.FontWeight="SemiBold"; [void]$wrap.Children.Add($lbl); $controls["label_"+$id]=$lbl }',
     '      if($kind -in @("text","textarea","numeric")){ $ctl=New-Object Windows.Controls.TextBox; $ctl.Text=[string]$spec.value; if($kind -eq "textarea"){ $ctl.AcceptsReturn=$true; $ctl.TextWrapping="Wrap"; $ctl.MinHeight=80 }; $handler={ if($kind -eq "numeric"){ $n=0.0; if([double]::TryParse($this.Text,[ref]$n)){ Send-Event $id $n } } else { Send-Event $id $this.Text } }.GetNewClosure(); $ctl.Add_TextChanged($handler) }',
     '      elseif($kind -in @("checkbox","theme")){ $ctl=New-Object Windows.Controls.CheckBox; $ctl.Content=$label; $ctl.IsChecked=[bool]$spec.value; $handler={ if($kind -eq "theme"){ $script:isDark=[bool]$this.IsChecked; Apply-Theme $win $script:isDark }; Send-Event $id ([bool]$this.IsChecked); Flush-PendingEvents }.GetNewClosure(); $ctl.Add_Click($handler) }',
-    '      elseif($kind -in @("select","selectize","varselectize")){ $ctl=New-Object Windows.Controls.ComboBox; $ctl.IsEditable=$false; foreach($choice in @(Get-ChoiceValues $spec.args.choices)){ [void]$ctl.Items.Add([string]$choice) }; $ctl.SelectedItem=[string]$spec.value; $handler={ if($this.SelectedItem){ Send-Event $id ([string]$this.SelectedItem); Flush-PendingEvents } }.GetNewClosure(); $ctl.Add_SelectionChanged($handler) }',
+    '      elseif($kind -in @("select","selectize","varselectize")){ if([bool]$spec.args.multiple){ $ctl=New-Object Windows.Controls.ListBox; $ctl.SelectionMode="Multiple"; $visible=6; if($null -ne $spec.args.size){ try { $visible=[math]::Max(1,[int]$spec.args.size) } catch {} }; $ctl.MinHeight=[math]::Max(72,26*$visible); $ctl.MaxHeight=$ctl.MinHeight; foreach($choice in @(Get-ChoiceValues $spec.args.choices)){ [void]$ctl.Items.Add([string]$choice) }; $selected=@($spec.value); foreach($v in $selected){ if($ctl.Items.Contains([string]$v)){ [void]$ctl.SelectedItems.Add([string]$v) } }; $handler={ $vals=[string[]]@($this.SelectedItems | ForEach-Object { [string]$_ }); Send-Event $id $vals; Flush-PendingEvents }.GetNewClosure(); $ctl.Add_SelectionChanged($handler) } else { $ctl=New-Object Windows.Controls.ComboBox; $ctl.IsEditable=$false; foreach($choice in @(Get-ChoiceValues $spec.args.choices)){ [void]$ctl.Items.Add([string]$choice) }; $value=@($spec.value); if($value.Count -gt 0){ $ctl.SelectedItem=[string]$value[0] }; $handler={ if($this.SelectedItem){ Send-Event $id ([string]$this.SelectedItem); Flush-PendingEvents } }.GetNewClosure(); $ctl.Add_SelectionChanged($handler) } }',
     '      elseif($kind -eq "slider"){ $ctl=New-Object Windows.Controls.Slider; $ctl.Minimum=[double]$spec.args.min; $ctl.Maximum=[double]$spec.args.max; $ctl.Value=[double]$spec.value; $ctl.TickFrequency=[double]$spec.args.step; $ctl.SmallChange=[double]$spec.args.step; $ctl.IsSnapToTickEnabled=$true; $ctl.TickPlacement="BottomRight"; $handler={ Send-Event $id ([double]$this.Value) }.GetNewClosure(); $ctl.Add_ValueChanged($handler) }',
     '      elseif($kind -eq "clipboard"){ $ctl=New-Object Windows.Controls.Button; $ctl.Content=$label; $handler={ try { Log ("Clipboard import clicked: "+[string]$id); $text=$null; $last=$null; for($attempt=0;$attempt -lt 30;$attempt++){ try { if([System.Windows.Forms.Clipboard]::ContainsText([System.Windows.Forms.TextDataFormat]::UnicodeText)){ $text=[System.Windows.Forms.Clipboard]::GetText([System.Windows.Forms.TextDataFormat]::UnicodeText) } elseif([System.Windows.Forms.Clipboard]::ContainsText()){ $text=[System.Windows.Forms.Clipboard]::GetText() } elseif([System.Windows.Clipboard]::ContainsText()){ $text=[System.Windows.Clipboard]::GetText() }; $last=$null; break } catch { $last=$_.Exception; Start-Sleep -Milliseconds 50 } }; if($null -ne $last){ throw $last }; if([string]::IsNullOrWhiteSpace([string]$text)){ throw "The Windows clipboard does not contain text." }; $safeId=([regex]::Replace([string]$id,"[^A-Za-z0-9_.-]","_")); $name=("clipboard_"+$safeId+"_"+[DateTime]::UtcNow.Ticks+"_"+[Guid]::NewGuid().ToString("N")+".txt"); $final=Join-Path $clipboardDir $name; $temp=$final+".tmp"; $utf8=New-Object System.Text.UTF8Encoding($false); Log ("Clipboard text characters: "+([string]$text).Length); [System.IO.File]::WriteAllText($temp,[string]$text,$utf8); Move-Item -LiteralPath $temp -Destination $final -Force; Log ("Clipboard transfer file: "+$final); Send-Event $id ([string]$final); Flush-PendingEvents; Log ("Clipboard import event flushed: "+[string]$id) } catch { Log ("Clipboard import error: "+($_ | Out-String)); Send-Event $id ("__WINSHINY_CLIPBOARD_ERROR__"+[string]$_.Exception.Message); Flush-PendingEvents } }.GetNewClosure(); $ctl.Add_Click($handler) }',
     '      elseif($kind -in @("button","link")){ $ctl=New-Object Windows.Controls.Button; $ctl.Content=$label; $script:dynamicButtonValues[$id]=0; $handler={ $script:dynamicButtonValues[$id]++; Send-Event $id $script:dynamicButtonValues[$id]; Flush-PendingEvents }.GetNewClosure(); $ctl.Add_Click($handler) }',
@@ -1139,7 +1154,8 @@ make_ps1 <- function(nodes, eventFile, stateFile, commandFile, readyFile, logFil
     '    $labelCtl=$controls["label_"+$id]; if($labelCtl -and $null -ne $message.label){ $labelCtl.Text=[string]$message.label }',
     '    if($ctl -is [Windows.Controls.TextBox]){ if($null -ne $message.value){ $ctl.Text=[string]$message.value } }',
     '    elseif($ctl -is [Windows.Controls.CheckBox]){ if($null -ne $message.value){ $ctl.IsChecked=[bool]$message.value } }',
-    '    elseif($ctl -is [Windows.Controls.ComboBox]){ if($null -ne $message.choices){ $ctl.Items.Clear(); foreach($v in @(Get-ChoiceValues $message.choices)){ [void]$ctl.Items.Add([string]$v) } }; if($null -ne $message.value){ $ctl.SelectedItem=[string]$message.value } }',
+    '    elseif($ctl -is [Windows.Controls.ComboBox]){ if($null -ne $message.choices){ $ctl.Items.Clear(); foreach($v in @(Get-ChoiceValues $message.choices)){ [void]$ctl.Items.Add([string]$v) } }; if($null -ne $message.value){ $values=@($message.value); if($values.Count -gt 0){ $ctl.SelectedItem=[string]$values[0] } else { $ctl.SelectedIndex=-1 } } }',
+    '    elseif($ctl -is [Windows.Controls.ListBox]){ if($null -ne $message.choices){ $ctl.Items.Clear(); foreach($v in @(Get-ChoiceValues $message.choices)){ [void]$ctl.Items.Add([string]$v) } }; if($null -ne $message.value){ $selected=@($message.value); $ctl.SelectedItems.Clear(); foreach($v in $selected){ if($ctl.Items.Contains([string]$v)){ [void]$ctl.SelectedItems.Add([string]$v) } } } }',
     '    elseif(($ctl -is [Windows.Controls.Panel]) -and ([string]$ctl.Tag -eq "winshiny-checkboxgroup")){ $selected=@($message.value); if($null -ne $message.choices){ $ctl.Children.Clear(); foreach($v in @(Get-ChoiceValues $message.choices)){ $cb=New-Object Windows.Controls.CheckBox; $cb.Content=[string]$v; $cb.Tag=[string]$v; $cb.Margin="0,2,12,2"; $handler={ $vals=@(); foreach($child in $ctl.Children){ if($child.IsChecked){ $vals += [string]$child.Tag } }; Send-Event $id $vals; Flush-PendingEvents }.GetNewClosure(); $cb.Add_Click($handler); [void]$ctl.Children.Add($cb) } }; foreach($child in $ctl.Children){ $child.IsChecked=($selected -contains [string]$child.Tag) }; Apply-Theme $ctl $script:isDark }',
     '    elseif($ctl -is [Windows.Controls.Slider]){ if($null -ne $message.min){ $ctl.Minimum=[double]$message.min }; if($null -ne $message.max){ $ctl.Maximum=[double]$message.max }; if($null -ne $message.step){ $ctl.TickFrequency=[double]$message.step; $ctl.SmallChange=[double]$message.step }; if($null -ne $message.value){ $ctl.Value=[double]$message.value } }',
     '    elseif($ctl -is [Windows.Controls.DatePicker]){ if($null -ne $message.value){ $ctl.SelectedDate=[datetime]$message.value } }',

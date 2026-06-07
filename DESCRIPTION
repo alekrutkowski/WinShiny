@@ -1,7 +1,7 @@
 Package: WinShiny
 Type: Package
 Title: Shiny-Compatible Native Windows GUI Backend via PowerShell/WPF
-Version: 0.6.11
+Version: 0.6.13
 Authors@R: person('Alek', 'Rutkowski', role = c('aut', 'cre'), email = 'alek.rutkowski@gmail.com')
 Description: Experimental Shiny-compatible API subset that renders native Windows GUI controls through PowerShell/WPF instead of a web browser. This package deliberately follows the public shape of Shiny inputs, outputs, render functions, and reactivity, but replaces the browser backend with a WPF runtime.
 License: MIT
