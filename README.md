@@ -34,6 +34,13 @@ library(WinShiny)
 
 ui <- fluidPage(
   titlePanel("Native WinShiny app"),
+
+  themeToggle(
+    inputId = "winshiny_theme",
+    label = "Dark mode",
+    value = FALSE
+  ),
+
   sliderInput("bins", "Histogram bins", 5, 50, 20, step = 1),
   plotOutput("plot")
 )
@@ -49,6 +56,10 @@ runApp(shinyApp(ui, server))
 
 `runApp()` owns the calling R session while the WPF window is open. Closing the
 window returns control to the R prompt.
+
+<img width="500" alt="light mode screenshot" src="https://github.com/user-attachments/assets/8f79302b-0b92-4a22-9a35-405e1047f4ba" />
+
+<img width="500" alt="dark mode screenshot" src="https://github.com/user-attachments/assets/29cff55f-f760-4fbe-a1a0-4b74df9e47d4" />
 
 ## Architecture
 
@@ -100,8 +111,6 @@ are not reproduced.
 | `sliderInput()` | tick-aware `Slider` |
 | `dateInput()` | `DatePicker` |
 | `dateRangeInput()` | two `DatePicker` controls |
-
-Date controls keep ISO `yyyy-mm-dd` values on the R side but honor common display formats in WPF. For a European day-first selector, use `format = "dd/mm/yyyy", language = "en-GB", weekstart = 1`.
 | `checkboxInput()` | `CheckBox` |
 | `checkboxGroupInput()` | checkbox panel |
 | `radioButtons()` | radio-button panel |
@@ -114,6 +123,9 @@ Date controls keep ISO `yyyy-mm-dd` values on the R side but honor common displa
 
 The corresponding `update*Input()` functions update both the live WPF control
 and the R-side input value for the supported properties.
+
+Date controls keep ISO `yyyy-mm-dd` values on the R side but honor common display formats in WPF.
+For a European day-first selector, use `format = "dd/mm/yyyy", language = "en-GB", weekstart = 1`.
 
 ### Outputs
 
