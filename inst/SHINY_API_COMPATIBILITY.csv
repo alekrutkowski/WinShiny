@@ -1,0 +1,284 @@
+function,status,notes
+..stacktraceoff..,not implemented,Not exported by WinShiny.
+..stacktraceon..,not implemented,Not exported by WinShiny.
+a,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+absolutePanel,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+actionButton,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+actionLink,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+addResourcePath,not implemented,Not exported by WinShiny.
+animationOptions,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+appendTab,not implemented,Not exported by WinShiny.
+as.shiny.appobj,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+basicPage,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+bindCache,not implemented,Not exported by WinShiny.
+bindEvent,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+bookmarkButton,not implemented,Not exported by WinShiny.
+bootstrapLib,not implemented,Not exported by WinShiny.
+bootstrapPage,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+br,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+browserViewer,not implemented,Not exported by WinShiny.
+brushedPoints,not implemented,Not exported by WinShiny.
+brushOpts,partial,Returns a descriptor; plot brushing is not yet implemented.
+busyIndicatorOptions,not implemented,Not exported by WinShiny.
+callModule,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+captureStackTraces,not implemented,Not exported by WinShiny.
+checkboxGroupInput,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+checkboxInput,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+clickOpts,partial,Returns a descriptor; plot click events are not yet implemented.
+code,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+column,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+conditionalPanel,partial,Supports a documented subset of simple input comparisons.
+conditionStackTrace,not implemented,Not exported by WinShiny.
+conditionStackTrace<-,not implemented,Not exported by WinShiny.
+createRenderFunction,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+createWebDependency,not implemented,Not exported by WinShiny.
+dataTableOutput,partial,Mapped to a native WPF DataGrid rather than the JavaScript DT/DataTables widget.
+dateInput,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+dateRangeInput,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+dblclickOpts,partial,Returns a descriptor; plot double-click events are not yet implemented.
+debounce,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+devmode,not implemented,Not exported by WinShiny.
+dialogViewer,not implemented,Not exported by WinShiny.
+diskCache,not implemented,Not exported by WinShiny.
+div,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+downloadButton,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+downloadHandler,native,Uses Windows SaveFileDialog and writes directly to the selected local path.
+downloadLink,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+em,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+enableBookmarking,not implemented,Not exported by WinShiny.
+eventReactive,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+exportTestValues,not implemented,Not exported by WinShiny.
+exprToFunction,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+ExtendedTask,not implemented,Not exported by WinShiny.
+fileInput,partial,Uses Windows OpenFileDialog; values are local paths rather than Shiny upload metadata.
+fillCol,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+fillPage,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+fillRow,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+fixedPage,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+fixedPanel,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+fixedRow,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+flowLayout,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+fluidPage,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+fluidRow,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+freezeReactiveVal,shim,Compatibility shim or metadata/no-op implementation; browser/server behavior is not reproduced.
+freezeReactiveValue,shim,Compatibility shim or metadata/no-op implementation; browser/server behavior is not reproduced.
+get_devmode_option,not implemented,Not exported by WinShiny.
+getCurrentOutputInfo,shim,Compatibility shim or metadata/no-op implementation; browser/server behavior is not reproduced.
+getCurrentTheme,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+getDefaultReactiveDomain,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+getQueryString,shim,Compatibility shim or metadata/no-op implementation; browser/server behavior is not reproduced.
+getShinyOption,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+getUrlHash,shim,Compatibility shim or metadata/no-op implementation; browser/server behavior is not reproduced.
+h1,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+h2,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+h3,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+h4,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+h5,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+h6,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+headerPanel,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+helpText,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+hideTab,not implemented,Not exported by WinShiny.
+hoverOpts,partial,Returns a descriptor; plot hover events are not yet implemented.
+hr,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+HTML,partial,Creates native text/control descriptions rather than browser HTML.
+htmlOutput,partial,Displays native text/control output; arbitrary browser HTML is not rendered.
+htmlTemplate,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+httpResponse,not implemented,Not exported by WinShiny.
+icon,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+imageOutput,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+img,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+in_devmode,not implemented,Not exported by WinShiny.
+includeCSS,shim,Compatibility shim or metadata/no-op implementation; browser/server behavior is not reproduced.
+includeHTML,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+includeMarkdown,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+includeScript,shim,Compatibility shim or metadata/no-op implementation; browser/server behavior is not reproduced.
+includeText,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+incProgress,not implemented,Not exported by WinShiny.
+inputPanel,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+insertTab,not implemented,Not exported by WinShiny.
+insertUI,not implemented,Not exported by WinShiny.
+installExprFunction,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+invalidateLater,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+is.key_missing,not implemented,Not exported by WinShiny.
+is.reactive,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+is.reactivevalues,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+is.shiny.appobj,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+is.singleton,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+isolate,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+isRunning,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+isTruthy,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+key_missing,not implemented,Not exported by WinShiny.
+loadSupport,not implemented,Not exported by WinShiny.
+localOtelCollect,not implemented,Not exported by WinShiny.
+mainPanel,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+makeReactiveBinding,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+markdown,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+markRenderFunction,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+maskReactiveContext,not implemented,Not exported by WinShiny.
+memoryCache,not implemented,Not exported by WinShiny.
+MockShinySession,not implemented,Not exported by WinShiny.
+modalButton,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+modalDialog,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+moduleServer,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+navbarMenu,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+navbarPage,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+navlistPanel,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+nearPoints,not implemented,Not exported by WinShiny.
+need,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+NS,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+ns.sep,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+numericInput,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+observe,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+observeEvent,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+onBookmark,not implemented,Not exported by WinShiny.
+onBookmarked,not implemented,Not exported by WinShiny.
+onFlush,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+onFlushed,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+onReactiveDomainEnded,shim,Compatibility shim or metadata/no-op implementation; browser/server behavior is not reproduced.
+onRestore,not implemented,Not exported by WinShiny.
+onRestored,not implemented,Not exported by WinShiny.
+onSessionEnded,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+onStop,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+onUnhandledError,not implemented,Not exported by WinShiny.
+outputOptions,shim,Compatibility shim or metadata/no-op implementation; browser/server behavior is not reproduced.
+p,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+pageWithSidebar,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+paneViewer,not implemented,Not exported by WinShiny.
+parseQueryString,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+passwordInput,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+plotOutput,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+plotPNG,not implemented,Not exported by WinShiny.
+pre,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+prependTab,not implemented,Not exported by WinShiny.
+printError,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+printStackTrace,not implemented,Not exported by WinShiny.
+Progress,not implemented,Not exported by WinShiny.
+quoToFunction,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+radioButtons,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+reactive,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+reactiveConsole,not implemented,Not exported by WinShiny.
+reactiveFileReader,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+reactivePoll,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+reactiveTimer,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+reactiveVal,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+reactiveValues,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+reactiveValuesToList,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+reactlog,not implemented,Not exported by WinShiny.
+reactlogAddMark,not implemented,Not exported by WinShiny.
+reactlogReset,not implemented,Not exported by WinShiny.
+reactlogShow,not implemented,Not exported by WinShiny.
+register_devmode_option,not implemented,Not exported by WinShiny.
+registerInputHandler,shim,Compatibility shim or metadata/no-op implementation; browser/server behavior is not reproduced.
+registerThemeDependency,not implemented,Not exported by WinShiny.
+removeInputHandler,shim,Compatibility shim or metadata/no-op implementation; browser/server behavior is not reproduced.
+removeModal,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+removeNotification,shim,Compatibility shim or metadata/no-op implementation; browser/server behavior is not reproduced.
+removeResourcePath,not implemented,Not exported by WinShiny.
+removeTab,not implemented,Not exported by WinShiny.
+removeUI,not implemented,Not exported by WinShiny.
+renderCachedPlot,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+renderDataTable,partial,Renders a native WPF DataGrid; JavaScript DT features are not available.
+renderImage,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+renderPlot,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+renderPrint,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+renderTable,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+renderText,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+renderUI,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+repeatable,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+req,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+resourcePaths,not implemented,Not exported by WinShiny.
+restoreInput,shim,Compatibility shim or metadata/no-op implementation; browser/server behavior is not reproduced.
+runApp,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+runExample,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+runGadget,not implemented,Not exported by WinShiny.
+runGist,not implemented,Not exported by WinShiny.
+runGitHub,not implemented,Not exported by WinShiny.
+runTests,not implemented,Not exported by WinShiny.
+runUrl,not implemented,Not exported by WinShiny.
+safeError,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+selectInput,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+selectizeInput,partial,Mapped to a native WPF ComboBox; Selectize.js options and server mode are not reproduced.
+serverInfo,shim,Compatibility shim or metadata/no-op implementation; browser/server behavior is not reproduced.
+setBookmarkExclude,not implemented,Not exported by WinShiny.
+setProgress,not implemented,Not exported by WinShiny.
+setSerializer,not implemented,Not exported by WinShiny.
+shinyApp,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+shinyAppDir,not implemented,Not exported by WinShiny.
+shinyAppFile,not implemented,Not exported by WinShiny.
+shinyAppTemplate,not implemented,Not exported by WinShiny.
+shinyOptions,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+shinyServer,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+shinyUI,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+showBookmarkUrlModal,not implemented,Not exported by WinShiny.
+showModal,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+showNotification,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+showTab,not implemented,Not exported by WinShiny.
+sidebarLayout,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+sidebarPanel,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+singleton,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+sizeGrowthRatio,not implemented,Not exported by WinShiny.
+sliderInput,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+snapshotExclude,not implemented,Not exported by WinShiny.
+snapshotPreprocessInput,shim,Compatibility shim or metadata/no-op implementation; browser/server behavior is not reproduced.
+snapshotPreprocessOutput,shim,Compatibility shim or metadata/no-op implementation; browser/server behavior is not reproduced.
+span,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+splitLayout,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+stopApp,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+strong,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+submitButton,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+suppressDependencies,shim,Compatibility shim or metadata/no-op implementation; browser/server behavior is not reproduced.
+tableOutput,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+tabPanel,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+tabPanelBody,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+tabsetPanel,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+tag,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+tagAppendAttributes,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+tagAppendChild,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+tagAppendChildren,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+tagGetAttribute,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+tagHasAttribute,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+tagList,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+tags,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+tagSetChildren,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+testServer,not implemented,Not exported by WinShiny.
+textAreaInput,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+textInput,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+textOutput,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+throttle,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+titlePanel,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+uiOutput,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+updateActionButton,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+updateActionLink,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+updateCheckboxGroupInput,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+updateCheckboxInput,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+updateDateInput,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+updateDateRangeInput,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+updateNavbarPage,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+updateNavlistPanel,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+updateNumericInput,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+updateQueryString,shim,Compatibility shim or metadata/no-op implementation; browser/server behavior is not reproduced.
+updateRadioButtons,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+updateSelectInput,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+updateSelectizeInput,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+updateSliderInput,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+updateTabsetPanel,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+updateTextAreaInput,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+updateTextInput,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+updateVarSelectInput,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+updateVarSelectizeInput,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+urlModal,not implemented,Not exported by WinShiny.
+useBusyIndicators,not implemented,Not exported by WinShiny.
+validate,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+validateCssUnit,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+varSelectInput,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+varSelectizeInput,partial,Mapped to a native WPF ComboBox of data-frame column names.
+verbatimTextOutput,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+verticalLayout,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+wellPanel,native,Implemented with a native PowerShell/WPF backend and a Shiny-like call signature.
+with_devmode,not implemented,Not exported by WinShiny.
+withLogErrors,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+withMathJax,shim,Compatibility shim or metadata/no-op implementation; browser/server behavior is not reproduced.
+withOtelCollect,not implemented,Not exported by WinShiny.
+withProgress,not implemented,Not exported by WinShiny.
+withReactiveDomain,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
+withTags,partial,Exported with useful compatibility behavior and documented native-backend limitations; see README.
