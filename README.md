@@ -21,10 +21,11 @@ No compiled code or Rtools is required.
 
 ## Installation
 
-Install a local source bundle with:
+Download `WinShiny_0.6.15.tar.gz` from https://github.com/alekrutkowski/WinShiny/releases
+and install with:
 
 ```r
-install.packages("WinShiny_x.y.z.tar.gz", repos = NULL, type = "source")
+install.packages("WinShiny_0.6.15.tar.gz", repos = NULL, type = "source")
 ```
 
 ## Quick start
@@ -115,7 +116,7 @@ are not reproduced.
 | `checkboxGroupInput()` | checkbox panel |
 | `radioButtons()` | radio-button panel |
 | `selectInput()` | `ComboBox` |
-| `selectizeInput()` | native `ComboBox`, not Selectize.js |
+| `selectizeInput()` | native emulation of Selectize.js |
 | `fileInput()` | Windows `OpenFileDialog` |
 | `actionButton()` / `actionLink()` | `Button` |
 | `clipboardButton()` | native clipboard-import button |
@@ -175,7 +176,6 @@ selected local path rather than returning an HTTP download.
 - htmlwidgets such as Leaflet, plotly, DT JavaScript extensions, and visNetwork
   are not supported.
 - Plot click, hover, double-click, and brush events are not implemented.
-- `selectizeInput()` does not reproduce Selectize.js behavior.
 - `fileInput()` returns local file paths, not browser-upload metadata.
 - Browser resource paths, bookmarking, URL mutation, dynamic DOM insertion,
   test-server emulation, caches, promises, reactlog, and telemetry are absent or
