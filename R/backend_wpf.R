@@ -380,25 +380,65 @@ collect_nodes <- function(ui) {
     choices <- inp$args$choices %||% character()
     multiple <- isTRUE(inp$args$multiple)
     selected <- as.character(inp$value %||% character())
-    if (multiple) {
+    use_selectize <- kind %in% c('selectize', 'varselectize') || isTRUE(inp$args$selectize)
+
+    if (use_selectize) {
+      options <- inp$args$options %||% list()
+      prompt <- as.character(options$placeholder %||% if (multiple) {
+        'Search and select one or more items...'
+      } else {
+        'Search and select an item...'
+      })[[1L]]
+      choice_values <- as.character(choices)
+      choice_labels <- names(choices)
+      if (is.null(choice_labels)) choice_labels <- choice_values
+      choice_labels[!nzchar(choice_labels)] <- choice_values[!nzchar(choice_labels)]
+      ps_entries <- Map(function(label, value) {
+        paste0(
+          '[pscustomobject]@{Display=', .ps_quote(label),
+          ';Value=', .ps_quote(value), '}'
+        )
+      }, choice_labels, choice_values)
+      ps_choices <- paste0(
+        '([object[]]@(', paste(unlist(ps_entries), collapse = ','), '))'
+      )
+      ps_selected <- paste0(
+        '([object[]]@(',
+        paste(vapply(selected, .ps_quote, character(1)), collapse = ','),
+        '))'
+      )
+      lines <- c(lines,
+        paste0(
+          ' ', ctrl, '=New-WinShinySelectizeControl -Items ', ps_choices,
+          ' -SelectedValues ', ps_selected,
+          ' -Multiple ', .ps_bool(multiple),
+          ' -Prompt ', .ps_quote(prompt),
+          ' -InputId ', .ps_quote(id),
+          ' -DarkMode $script:isDark',
+          ' -DisplayProperty ', .ps_quote('Display'),
+          ' -ValueProperty ', .ps_quote('Value')
+        )
+      )
+    } else if (multiple) {
       visible_items <- suppressWarnings(as.integer(inp$args$size %||% min(6L, max(3L, length(choices)))))
       if (is.na(visible_items) || visible_items < 1L) visible_items <- 6L
       lines <- c(lines,
-        paste0('  ', ctrl, '=New-Object Windows.Controls.ListBox'),
-        paste0('  ', ctrl, '.SelectionMode="Multiple"; ', ctrl, '.MinHeight=', max(72L, 26L * visible_items), '; ', ctrl, '.MaxHeight=', max(72L, 26L * visible_items)),
-        unname(vapply(choices, function(v) paste0('  [void]', ctrl, '.Items.Add(', .ps_quote(v), ')'), character(1))),
-        unname(vapply(selected, function(v) paste0('  if(', ctrl, '.Items.Contains(', .ps_quote(v), ')){ [void]', ctrl, '.SelectedItems.Add(', .ps_quote(v), ') }'), character(1))),
-        paste0('  ', ctrl, '.Add_SelectionChanged({ $vals=[string[]]@($this.SelectedItems | ForEach-Object { [string]$_ }); Send-Event ', .ps_quote(id), ' $vals; Flush-PendingEvents })')
+        paste0(' ', ctrl, '=New-Object Windows.Controls.ListBox'),
+        paste0(' ', ctrl, '.SelectionMode="Multiple"; ', ctrl, '.MinHeight=', max(72L, 26L * visible_items), '; ', ctrl, '.MaxHeight=', max(72L, 26L * visible_items)),
+        unname(vapply(choices, function(v) paste0(' [void]', ctrl, '.Items.Add(', .ps_quote(v), ')'), character(1))),
+        unname(vapply(selected, function(v) paste0(' if(', ctrl, '.Items.Contains(', .ps_quote(v), ')){ [void]', ctrl, '.SelectedItems.Add(', .ps_quote(v), ') }'), character(1))),
+        paste0(' ', ctrl, '.Add_SelectionChanged({ $vals=[string[]]@($this.SelectedItems | ForEach-Object { [string]$_ }); Send-Event ', .ps_quote(id), ' $vals; Flush-PendingEvents })')
       )
     } else {
       lines <- c(lines,
-        paste0('  ', ctrl, '=New-Object Windows.Controls.ComboBox'),
-        paste0('  ', ctrl, '.IsEditable=$false; ', ctrl, '.IsTextSearchEnabled=$true'),
-        unname(vapply(choices, function(v) paste0('  [void]', ctrl, '.Items.Add(', .ps_quote(v), ')'), character(1))),
-        paste0('  ', ctrl, '.SelectedItem=', .ps_quote(if (length(selected)) selected[[1]] else '')),
-        paste0('  ', ctrl, '.Add_SelectionChanged({ if($this.SelectedItem -ne $null){ Send-Event ', .ps_quote(id), ' ([string]$this.SelectedItem); Flush-PendingEvents } })')
+        paste0(' ', ctrl, '=New-Object Windows.Controls.ComboBox'),
+        paste0(' ', ctrl, '.IsEditable=$false; ', ctrl, '.IsTextSearchEnabled=$true'),
+        unname(vapply(choices, function(v) paste0(' [void]', ctrl, '.Items.Add(', .ps_quote(v), ')'), character(1))),
+        paste0(' ', ctrl, '.SelectedItem=', .ps_quote(if (length(selected)) selected[[1]] else '')),
+        paste0(' ', ctrl, '.Add_SelectionChanged({ if($this.SelectedItem -ne $null){ Send-Event ', .ps_quote(id), ' ([string]$this.SelectedItem); Flush-PendingEvents } })')
       )
     }
+
   } else if (kind == 'radio') {
     choices <- inp$args$choices %||% character()
     lines <- c(lines, paste0('  ', ctrl, '=New-Object Windows.Controls.', if (isTRUE(inp$args$inline)) 'WrapPanel' else 'StackPanel'))
@@ -799,10 +839,33 @@ collect_nodes <- function(ui) {
   list(lines = lines[nzchar(lines)], var = container)
 }
 
+
+.selectize_control_ps <- function() {
+  path <- system.file(
+    'powershell', 'New-SelectizeControl.ps1',
+    package = 'WinShiny'
+  )
+
+  if (!nzchar(path)) {
+    candidate <- file.path('inst', 'powershell', 'New-SelectizeControl.ps1')
+    if (file.exists(candidate)) path <- candidate
+  }
+
+  if (!nzchar(path) || !file.exists(path)) {
+    stop(
+      'WinShiny could not find inst/powershell/New-SelectizeControl.ps1.',
+      call. = FALSE
+    )
+  }
+
+  readLines(path, warn = FALSE, encoding = 'UTF-8')
+}
+
 make_ps1 <- function(nodes, eventFile, stateFile, commandFile, readyFile, logFile) {
   st <- .ps_gen_state()
   root_panel <- '$rootPanel'
   generated <- .ps_emit_node(nodes$ui, root_panel, st)$lines
+  selectize_control <- .selectize_control_ps()
 
   lines <- c(
     '$ErrorActionPreference="Stop"',
@@ -822,6 +885,7 @@ make_ps1 <- function(nodes, eventFile, stateFile, commandFile, readyFile, logFil
     '  Add-Type -AssemblyName System.Windows.Forms',
     '  Add-Type -AssemblyName System.Data',
     '  Add-Type -AssemblyName System.Drawing',
+  selectize_control,
     "  try { Add-Type -Namespace WinShiny -Name NativeMethods -MemberDefinition '[System.Runtime.InteropServices.DllImport(\"dwmapi.dll\")] public static extern int DwmSetWindowAttribute(System.IntPtr hwnd, int attribute, ref int value, int size);' -ErrorAction Stop } catch { }",
     '  $controls=@{}',
     '  $inputControls=@{}',
@@ -1090,6 +1154,7 @@ make_ps1 <- function(nodes, eventFile, stateFile, commandFile, readyFile, logFil
     '      elseif($ctl -is [Windows.Controls.ScrollViewer] -and $ctl.Content){ Paint-Control $ctl.Content }',
     '      elseif($ctl -is [Windows.Controls.ContentControl] -and $ctl.Content -is [Windows.DependencyObject]){ Paint-Control $ctl.Content }',
     '      elseif($ctl -is [Windows.Controls.ItemsControl]){ foreach($item in $ctl.Items){ if($item -is [Windows.DependencyObject]){ Paint-Control $item } } }',
+    '      if(($ctl -is [Windows.Controls.StackPanel]) -and ([string]$ctl.Uid -eq "winshiny-selectize-inline")){ Set-WinShinySelectizeTheme -Control $ctl -DarkMode $dark }',
     '    }',
     '    if($root -is [Windows.Window]){ try { $root.Resources[[Windows.Controls.Primitives.ScrollBar]]=(New-WinShinyScrollBarStyle $dark) } catch { Log ("ScrollBar theme warning: "+($_ | Out-String)) } }',
     '    Paint-Control $root',
@@ -1127,6 +1192,7 @@ make_ps1 <- function(nodes, eventFile, stateFile, commandFile, readyFile, logFil
     '  function Set-ImageSource($ctl,$status,$source){ try { if([string]::IsNullOrWhiteSpace([string]$source)){ throw "The renderer returned an empty image path." }; $src=[string]$source; if(!(Test-Path -LiteralPath $src)){ throw ("Image file does not exist: "+$src) }; $stream=[System.IO.File]::Open($src,[System.IO.FileMode]::Open,[System.IO.FileAccess]::Read,[System.IO.FileShare]::ReadWrite); try { $decoder=[System.Windows.Media.Imaging.PngBitmapDecoder]::new($stream,[System.Windows.Media.Imaging.BitmapCreateOptions]::PreservePixelFormat,[System.Windows.Media.Imaging.BitmapCacheOption]::OnLoad); $bmp=$decoder.Frames[0]; $bmp.Freeze(); $ctl.Source=$bmp; $ctl.ToolTip=("Image "+$bmp.PixelWidth+" x "+$bmp.PixelHeight); $status.Text=""; $status.Visibility="Collapsed"; $ctl.Visibility="Visible"; $ctl.InvalidateMeasure(); $ctl.InvalidateVisual() } finally { if($stream){ $stream.Dispose() } } } catch { $ctl.Source=$null; $ctl.Visibility="Collapsed"; $status.Text=("Plot error: "+[string]$_.Exception.Message); $status.Visibility="Visible"; Log ("Image load error: "+($_ | Out-String)) } }',
     '  function Set-TableData($ctl,$status,$value){ try { $ctl.ItemsSource=$null; $ctl.Tag=$null; $ctl.Columns.Clear(); $columns=@(); $rows=@(); if($null -ne $value){ $rawColumns=$value.columns; if($null -ne $rawColumns){ if(($rawColumns -is [Management.Automation.PSCustomObject]) -and ($null -eq $rawColumns.PSObject.Properties["key"])){ $columns=@($rawColumns.PSObject.Properties | ForEach-Object { $_.Value }) } else { $columns=@($rawColumns) } }; $rows=@($value.rows | Where-Object { $null -ne $_ }) }; $validColumns=New-Object System.Collections.ArrayList; $dt=[System.Data.DataTable]::new("WinShinyTable"); foreach($spec in $columns){ if($null -eq $spec){ continue }; $key=[string]$spec.key; if([string]::IsNullOrWhiteSpace($key)){ continue }; $label=[string]$spec.label; if([string]::IsNullOrWhiteSpace($label)){ $label=$key }; [void]$dt.Columns.Add([System.Data.DataColumn]::new($key,[object])); [void]$validColumns.Add($spec); $column=[Windows.Controls.DataGridTextColumn]::new(); $column.Header=$label; $column.MinWidth=72; $binding=[Windows.Data.Binding]::new("["+$key+"]"); $binding.Mode=[Windows.Data.BindingMode]::OneWay; $column.Binding=$binding; $column.Width=[Windows.Controls.DataGridLength]::new(1,[Windows.Controls.DataGridLengthUnitType]::Star); [void]$ctl.Columns.Add($column) }; foreach($row in $rows){ if($null -eq $row){ continue }; $dr=$dt.NewRow(); $hasValue=$false; for($j=0; $j -lt $validColumns.Count; $j++){ $spec=$validColumns[$j]; $key=[string]$spec.key; $prop=$row.PSObject.Properties[$key]; if($null -ne $prop -and $null -ne $prop.Value){ $dr[$j]=$prop.Value; if(-not [string]::IsNullOrWhiteSpace([string]$prop.Value)){ $hasValue=$true } } else { $dr[$j]=[DBNull]::Value } }; if($hasValue){ [void]$dt.Rows.Add($dr) } }; $view=$dt.DefaultView; $view.AllowNew=$false; $view.AllowDelete=$false; $view.AllowEdit=$false; try { $view.NewItemPlaceholderPosition=[System.ComponentModel.NewItemPlaceholderPosition]::None } catch {}; $ctl.Tag=$dt; $ctl.ItemsSource=$view; $ctl.CanUserAddRows=$false; $fill=$false; try { $fill=[bool]$ctl.WinShinyFill } catch {}; $ctl.Height=[double]::NaN; if($fill){ $ctl.MaxHeight=[double]::PositiveInfinity; $ctl.VerticalAlignment="Stretch" } else { $ctl.MaxHeight=500; $ctl.VerticalAlignment="Top" }; $ctl.UpdateLayout(); $ctl.Visibility="Visible"; $status.Visibility="Collapsed"; Apply-Theme $ctl $script:isDark; if($fill){ Schedule-ResponsiveLayout } } catch { $ctl.ItemsSource=$null; $ctl.Tag=$null; $ctl.Visibility="Collapsed"; $status.Text=("Table error: "+[string]$_.Exception.Message); $status.Visibility="Visible"; Log ("Table binding error: "+($_ | Out-String)) } }',
     '  function Get-ChoiceValues($choices){ if($null -eq $choices){ return @() }; if($choices -is [System.Array]){ return @($choices) }; if($choices -is [System.Management.Automation.PSCustomObject]){ return @($choices.PSObject.Properties.Value) }; return @($choices) }',
+    '  function Get-ChoiceEntries($choices){ if($null -eq $choices){ return @() }; $entries=@(); if($choices -is [System.Management.Automation.PSCustomObject]){ foreach($property in $choices.PSObject.Properties){ $label=if([string]::IsNullOrWhiteSpace([string]$property.Name)){[string]$property.Value}else{[string]$property.Name}; $entries += [pscustomobject]@{Display=$label;Value=$property.Value} }; return $entries }; foreach($choice in @($choices)){ $entries += [pscustomobject]@{Display=[string]$choice;Value=$choice} }; return $entries }',
     '  function New-DynamicNode($spec){',
     '    if($null -eq $spec){ return (New-Object Windows.Controls.StackPanel) }',
     '    $nodeType=[string]$spec.nodeType',
@@ -1136,7 +1202,7 @@ make_ps1 <- function(nodes, eventFile, stateFile, commandFile, readyFile, logFil
     '      if($kind -notin @("checkbox","theme","button","link","clipboard")){ $lbl=New-Object Windows.Controls.TextBlock; $lbl.Text=$label; $lbl.FontWeight="SemiBold"; [void]$wrap.Children.Add($lbl); $controls["label_"+$id]=$lbl }',
     '      if($kind -in @("text","textarea","numeric")){ $ctl=New-Object Windows.Controls.TextBox; $ctl.Text=[string]$spec.value; if($kind -eq "textarea"){ $ctl.AcceptsReturn=$true; $ctl.TextWrapping="Wrap"; $ctl.MinHeight=80 }; $handler={ if($kind -eq "numeric"){ $n=0.0; if([double]::TryParse($this.Text,[ref]$n)){ Send-Event $id $n } } else { Send-Event $id $this.Text } }.GetNewClosure(); $ctl.Add_TextChanged($handler) }',
     '      elseif($kind -in @("checkbox","theme")){ $ctl=New-Object Windows.Controls.CheckBox; $ctl.Content=$label; $ctl.IsChecked=[bool]$spec.value; $handler={ if($kind -eq "theme"){ $script:isDark=[bool]$this.IsChecked; Apply-Theme $win $script:isDark }; Send-Event $id ([bool]$this.IsChecked); Flush-PendingEvents }.GetNewClosure(); $ctl.Add_Click($handler) }',
-    '      elseif($kind -in @("select","selectize","varselectize")){ if([bool]$spec.args.multiple){ $ctl=New-Object Windows.Controls.ListBox; $ctl.SelectionMode="Multiple"; $visible=6; if($null -ne $spec.args.size){ try { $visible=[math]::Max(1,[int]$spec.args.size) } catch {} }; $ctl.MinHeight=[math]::Max(72,26*$visible); $ctl.MaxHeight=$ctl.MinHeight; foreach($choice in @(Get-ChoiceValues $spec.args.choices)){ [void]$ctl.Items.Add([string]$choice) }; $selected=@($spec.value); foreach($v in $selected){ if($ctl.Items.Contains([string]$v)){ [void]$ctl.SelectedItems.Add([string]$v) } }; $handler={ $vals=[string[]]@($this.SelectedItems | ForEach-Object { [string]$_ }); Send-Event $id $vals; Flush-PendingEvents }.GetNewClosure(); $ctl.Add_SelectionChanged($handler) } else { $ctl=New-Object Windows.Controls.ComboBox; $ctl.IsEditable=$false; foreach($choice in @(Get-ChoiceValues $spec.args.choices)){ [void]$ctl.Items.Add([string]$choice) }; $value=@($spec.value); if($value.Count -gt 0){ $ctl.SelectedItem=[string]$value[0] }; $handler={ if($this.SelectedItem){ Send-Event $id ([string]$this.SelectedItem); Flush-PendingEvents } }.GetNewClosure(); $ctl.Add_SelectionChanged($handler) } }',
+    '      elseif($kind -in @("select","selectize","varselectize")){ $multiple=[bool]$spec.args.multiple; $useSelectize=($kind -in @("selectize","varselectize")) -or [bool]$spec.args.selectize; $choiceEntries=@(Get-ChoiceEntries $spec.args.choices); $choices=@($choiceEntries | ForEach-Object { $_.Value }); $selected=@($spec.value); if($useSelectize){ $prompt=if($multiple){"Search and select one or more items..."}else{"Search and select an item..."}; try { $candidate=[string]$spec.args.options.placeholder; if(-not [string]::IsNullOrWhiteSpace($candidate)){ $prompt=$candidate } } catch {}; $ctl=New-WinShinySelectizeControl -Items ([object[]]$choiceEntries) -SelectedValues ([object[]]$selected) -Multiple $multiple -Prompt $prompt -InputId $id -DarkMode $script:isDark -DisplayProperty "Display" -ValueProperty "Value" } elseif($multiple){ $ctl=New-Object Windows.Controls.ListBox; $ctl.SelectionMode="Multiple"; $visible=6; if($null -ne $spec.args.size){ try { $visible=[math]::Max(1,[int]$spec.args.size) } catch {} }; $ctl.MinHeight=[math]::Max(72,26*$visible); $ctl.MaxHeight=$ctl.MinHeight; foreach($choice in $choices){ [void]$ctl.Items.Add([string]$choice) }; foreach($v in $selected){ if($ctl.Items.Contains([string]$v)){ [void]$ctl.SelectedItems.Add([string]$v) } }; $handler={ $vals=[string[]]@($this.SelectedItems | ForEach-Object { [string]$_ }); Send-Event $id $vals; Flush-PendingEvents }.GetNewClosure(); $ctl.Add_SelectionChanged($handler) } else { $ctl=New-Object Windows.Controls.ComboBox; $ctl.IsEditable=$false; foreach($choice in $choices){ [void]$ctl.Items.Add([string]$choice) }; if($selected.Count -gt 0){ $ctl.SelectedItem=[string]$selected[0] }; $handler={ if($this.SelectedItem){ Send-Event $id ([string]$this.SelectedItem); Flush-PendingEvents } }.GetNewClosure(); $ctl.Add_SelectionChanged($handler) } }',
     '      elseif($kind -eq "slider"){ $ctl=New-Object Windows.Controls.Slider; $ctl.Minimum=[double]$spec.args.min; $ctl.Maximum=[double]$spec.args.max; $ctl.Value=[double]$spec.value; $ctl.TickFrequency=[double]$spec.args.step; $ctl.SmallChange=[double]$spec.args.step; $ctl.IsSnapToTickEnabled=$true; $ctl.TickPlacement="BottomRight"; $handler={ Send-Event $id ([double]$this.Value) }.GetNewClosure(); $ctl.Add_ValueChanged($handler) }',
     '      elseif($kind -eq "clipboard"){ $ctl=New-Object Windows.Controls.Button; $ctl.Content=$label; $handler={ try { Log ("Clipboard import clicked: "+[string]$id); $text=$null; $last=$null; for($attempt=0;$attempt -lt 30;$attempt++){ try { if([System.Windows.Forms.Clipboard]::ContainsText([System.Windows.Forms.TextDataFormat]::UnicodeText)){ $text=[System.Windows.Forms.Clipboard]::GetText([System.Windows.Forms.TextDataFormat]::UnicodeText) } elseif([System.Windows.Forms.Clipboard]::ContainsText()){ $text=[System.Windows.Forms.Clipboard]::GetText() } elseif([System.Windows.Clipboard]::ContainsText()){ $text=[System.Windows.Clipboard]::GetText() }; $last=$null; break } catch { $last=$_.Exception; Start-Sleep -Milliseconds 50 } }; if($null -ne $last){ throw $last }; if([string]::IsNullOrWhiteSpace([string]$text)){ throw "The Windows clipboard does not contain text." }; $safeId=([regex]::Replace([string]$id,"[^A-Za-z0-9_.-]","_")); $name=("clipboard_"+$safeId+"_"+[DateTime]::UtcNow.Ticks+"_"+[Guid]::NewGuid().ToString("N")+".txt"); $final=Join-Path $clipboardDir $name; $temp=$final+".tmp"; $utf8=New-Object System.Text.UTF8Encoding($false); Log ("Clipboard text characters: "+([string]$text).Length); [System.IO.File]::WriteAllText($temp,[string]$text,$utf8); Move-Item -LiteralPath $temp -Destination $final -Force; Log ("Clipboard transfer file: "+$final); Send-Event $id ([string]$final); Flush-PendingEvents; Log ("Clipboard import event flushed: "+[string]$id) } catch { Log ("Clipboard import error: "+($_ | Out-String)); Send-Event $id ("__WINSHINY_CLIPBOARD_ERROR__"+[string]$_.Exception.Message); Flush-PendingEvents } }.GetNewClosure(); $ctl.Add_Click($handler) }',
     '      elseif($kind -in @("button","link")){ $ctl=New-Object Windows.Controls.Button; $ctl.Content=$label; $script:dynamicButtonValues[$id]=0; $handler={ $script:dynamicButtonValues[$id]++; Send-Event $id $script:dynamicButtonValues[$id]; Flush-PendingEvents }.GetNewClosure(); $ctl.Add_Click($handler) }',
@@ -1152,7 +1218,8 @@ make_ps1 <- function(nodes, eventFile, stateFile, commandFile, readyFile, logFil
     '  function Apply-InputMessage($id,$message){',
     '    $ctl=$inputControls[$id]; if(!$ctl){ return }',
     '    $labelCtl=$controls["label_"+$id]; if($labelCtl -and $null -ne $message.label){ $labelCtl.Text=[string]$message.label }',
-    '    if($ctl -is [Windows.Controls.TextBox]){ if($null -ne $message.value){ $ctl.Text=[string]$message.value } }',
+    '    if(($ctl -is [Windows.Controls.StackPanel]) -and ([string]$ctl.Uid -eq "winshiny-selectize-inline")){ $choicesProperty=$message.PSObject.Properties["choices"]; if($null -ne $choicesProperty){ Set-WinShinySelectizeItems -Control $ctl -Items ([object[]]@(Get-ChoiceEntries $choicesProperty.Value)) -DisplayProperty "Display" -ValueProperty "Value" }; $valueProperty=$message.PSObject.Properties["value"]; if($null -ne $valueProperty){ Set-WinShinySelectizeSelectedValues -Control $ctl -Values ([object[]]@($valueProperty.Value)) } }',
+    '    elseif($ctl -is [Windows.Controls.TextBox]){ if($null -ne $message.value){ $ctl.Text=[string]$message.value } }',
     '    elseif($ctl -is [Windows.Controls.CheckBox]){ if($null -ne $message.value){ $ctl.IsChecked=[bool]$message.value } }',
     '    elseif($ctl -is [Windows.Controls.ComboBox]){ if($null -ne $message.choices){ $ctl.Items.Clear(); foreach($v in @(Get-ChoiceValues $message.choices)){ [void]$ctl.Items.Add([string]$v) } }; if($null -ne $message.value){ $values=@($message.value); if($values.Count -gt 0){ $ctl.SelectedItem=[string]$values[0] } else { $ctl.SelectedIndex=-1 } } }',
     '    elseif($ctl -is [Windows.Controls.ListBox]){ if($null -ne $message.choices){ $ctl.Items.Clear(); foreach($v in @(Get-ChoiceValues $message.choices)){ [void]$ctl.Items.Add([string]$v) } }; if($null -ne $message.value){ $selected=@($message.value); $ctl.SelectedItems.Clear(); foreach($v in $selected){ if($ctl.Items.Contains([string]$v)){ [void]$ctl.SelectedItems.Add([string]$v) } } } }',
